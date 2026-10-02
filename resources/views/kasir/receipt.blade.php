@@ -252,7 +252,7 @@
         ========================================== --}}
 
         <div class="store-name">
-            TokoMini
+            TokoLokal
         </div>
 
         <div class="store-info">
@@ -502,7 +502,7 @@
 
             <br>
 
-            Terima kasih telah berbelanja di TokoMini.
+            Terima kasih telah berbelanja di TokoLokal.
 
             <br>
 

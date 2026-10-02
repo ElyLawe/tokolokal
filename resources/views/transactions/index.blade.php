@@ -318,7 +318,7 @@
                 </h1>
 
                 <p class="history-subtitle">
-                    Daftar transaksi penjualan TokoMini yang telah dilakukan.
+                    Daftar transaksi penjualan TokoLokal yang telah dilakukan.
                 </p>
             </div>
 

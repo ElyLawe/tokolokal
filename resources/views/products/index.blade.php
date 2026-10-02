@@ -40,7 +40,7 @@
                     color: #6b7280;
                     font-size: 15px;
                 ">
-                    Kelola product yang tersedia di TokoMini.
+                    Kelola product yang tersedia di TokoLokal.
                 </p>
 
             </div>

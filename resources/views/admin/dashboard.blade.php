@@ -32,7 +32,7 @@
                 color: #6b7280;
                 font-size: 15px;
             ">
-                Selamat datang di sistem TokoMini.
+                Selamat datang di sistem TokoLokal.
             </p>
 
         </div>
@@ -60,7 +60,7 @@
                 font-size: 24px;
                 font-weight: 700;
             ">
-                Kelola TokoMini dengan mudah
+                Kelola TokoLokal dengan mudah
             </div>
 
             <p style="
@@ -243,7 +243,7 @@
                         font-weight: 700;
                         color: #1f2937;
                     ">
-                        TokoMini
+                        TokoLokal
                     </div>
                 </div>
 

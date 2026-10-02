@@ -31,7 +31,7 @@
                 color: #6b7280;
                 font-size: 15px;
             ">
-                Tambahkan product baru ke dalam sistem TokoMini.
+                Tambahkan product baru ke dalam sistem TokoLokal.
             </p>
 
         </div>
