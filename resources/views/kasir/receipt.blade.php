@@ -2,89 +2,100 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>
-        Struk {{ $transaction->transaction_number }}
-    </title>
+    <title>Struk {{ $transaction->transaction_number }}</title>
 
     <style>
-
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            padding: 30px;
             background: #f3f4f6;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #111827;
+            font-family: 'Courier New', Courier, monospace, Arial, sans-serif;
+            color: #000;
+            padding: 20px 0;
         }
 
+        /* 
+        |--------------------------------------------------------------------------
+        | PENGATURAN TAMPILAN DILAYAR (DEFAULT 58MM / 80MM)
+        |--------------------------------------------------------------------------
+        */
         .receipt-wrapper {
-            max-width: 420px;
+            width: 100%;
+            /* Ganti ke 80mm jika mayoritas printer menggunakan ukuran 80mm */
+            max-width: 58mm; 
             margin: 0 auto;
         }
 
         .receipt {
             background: white;
-            padding: 24px;
-            border-radius: 10px;
+            padding: 10px 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            border-radius: 4px;
         }
 
         .store-name {
             text-align: center;
-            font-size: 22px;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 4px;
+            text-transform: uppercase;
         }
 
         .store-info {
             text-align: center;
-            color: #6b7280;
-            font-size: 12px;
-            line-height: 1.5;
+            font-size: 10px;
+            line-height: 1.3;
+            margin-top: 2px;
         }
 
         .line {
-            border-top: 1px dashed #9ca3af;
-            margin: 15px 0;
+            border-top: 1px dashed #000;
+            margin: 8px 0;
         }
 
         .transaction-info {
-            font-size: 13px;
-            line-height: 1.7;
+            font-size: 10px;
+            line-height: 1.4;
         }
 
         .transaction-info-row {
             display: flex;
             justify-content: space-between;
-            gap: 15px;
+            gap: 5px;
+            margin-bottom: 2px;
         }
 
         .transaction-info-row span:first-child {
-            color: #6b7280;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .transaction-info-row span:last-child,
+        .transaction-info-row strong {
+            text-align: right;
+            word-break: break-all;
         }
 
         .items {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 10px;
         }
 
         .items th {
             text-align: left;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #000;
+            font-size: 10px;
         }
 
         .items td {
-            padding: 8px 0;
+            padding: 4px 0;
             vertical-align: top;
         }
 
@@ -93,32 +104,33 @@
         }
 
         .item-name {
-            font-weight: 600;
+            font-weight: bold;
+            display: block;
+            word-break: break-word;
         }
 
         .item-detail {
             display: block;
-            color: #6b7280;
-            font-size: 11px;
-            margin-top: 3px;
+            font-size: 9px;
+            margin-top: 1px;
         }
 
         .summary {
-            font-size: 13px;
+            font-size: 10px;
         }
 
         .summary-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
         }
 
         .summary-row.total {
-            font-size: 18px;
+            font-size: 12px;
             font-weight: bold;
-            padding-top: 10px;
-            margin-top: 10px;
-            border-top: 1px dashed #9ca3af;
+            padding-top: 5px;
+            margin-top: 5px;
+            border-top: 1px dashed #000;
         }
 
         .summary-row.change {
@@ -131,23 +143,23 @@
 
         .thank-you {
             text-align: center;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #374151;
+            margin-top: 10px;
+            font-size: 10px;
+            line-height: 1.3;
         }
 
         .button-area {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 8px;
+            margin-top: 15px;
         }
 
         .button {
             border: none;
-            border-radius: 7px;
-            padding: 11px 18px;
-            font-size: 14px;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
@@ -164,402 +176,189 @@
             border: 1px solid #d1d5db;
         }
 
-
-        /* =========================================
-           MODE CETAK
-        ========================================= */
-
+        /* 
+        |--------------------------------------------------------------------------
+        | MODE CETAK (PRINT)
+        |--------------------------------------------------------------------------
+        */
         @media print {
-
             @page {
-                size: 80mm auto;
-                margin: 5mm;
+                /* Gunakan 58mm auto ATAU 80mm auto sesuai tipe printer Anda */
+                size: 58mm auto;
+                margin: 0;
             }
 
             body {
                 background: white;
                 padding: 0;
+                margin: 0;
             }
 
             .receipt-wrapper {
                 width: 100%;
-                max-width: none;
+                max-width: 100%;
             }
 
             .receipt {
                 box-shadow: none;
                 border-radius: 0;
-                padding: 0;
+                padding: 2mm 2mm;
             }
 
             .button-area {
-                display: none;
+                display: none !important;
             }
-
         }
-
-
-        /* =========================================
-           PRINTER THERMAL 58MM
-        ========================================= */
-
-        @media print and (max-width: 70mm) {
-
-            @page {
-                size: 58mm auto;
-                margin: 3mm;
-            }
-
-            body {
-                font-size: 11px;
-            }
-
-            .store-name {
-                font-size: 17px;
-            }
-
-            .store-info {
-                font-size: 9px;
-            }
-
-            .items {
-                font-size: 10px;
-            }
-
-            .summary {
-                font-size: 10px;
-            }
-
-            .summary-row.total {
-                font-size: 14px;
-            }
-
-        }
-
     </style>
-
 </head>
-
 
 <body>
 
 <div class="receipt-wrapper">
-
     <div class="receipt">
 
-        {{-- =========================================
-             HEADER TOKO
-        ========================================== --}}
-
-        <div class="store-name">
-            TokoLokal
-        </div>
-
+        {{-- HEADER TOKO --}}
+        <div class="store-name">TokoLokal</div>
         <div class="store-info">
-            Sistem Penjualan & Kasir
-            <br>
+            Sistem Penjualan & Kasir<br>
             Terima kasih telah berbelanja
         </div>
 
-
         <div class="line"></div>
 
-
-        {{-- =========================================
-             INFORMASI TRANSAKSI
-        ========================================== --}}
-
+        {{-- INFORMASI TRANSAKSI --}}
         <div class="transaction-info">
-
             <div class="transaction-info-row">
-                <span>No. Transaksi</span>
-
-                <strong>
-                    {{ $transaction->transaction_number }}
-                </strong>
+                <span>No. Trans</span>
+                <strong>{{ $transaction->transaction_number }}</strong>
             </div>
-
 
             <div class="transaction-info-row">
                 <span>Tanggal</span>
-
-                <span>
-                    {{ $transaction->created_at->format('d/m/Y H:i') }}
-                </span>
+                <span>{{ $transaction->created_at->format('d/m/Y H:i') }}</span>
             </div>
-
 
             <div class="transaction-info-row">
                 <span>Kasir</span>
-
-                <span>
-                    {{ $transaction->user->name ?? '-' }}
-                </span>
+                <span>{{ $transaction->user->name ?? '-' }}</span>
             </div>
-
 
             <div class="transaction-info-row">
                 <span>Pelanggan</span>
-
-                <span>
-                    {{ $transaction->customer->name ?? 'Umum' }}
-                </span>
+                <span>{{ $transaction->customer->name ?? 'Umum' }}</span>
             </div>
-
         </div>
-
 
         <div class="line"></div>
 
-
-        {{-- =========================================
-             DETAIL BARANG
-        ========================================== --}}
-
+        {{-- DETAIL BARANG --}}
         <table class="items">
-
             <thead>
-
                 <tr>
-
-                    <th>
-                        Barang
-                    </th>
-
-                    <th class="text-right">
-                        Subtotal
-                    </th>
-
+                    <th>Barang</th>
+                    <th class="text-right">Subtotal</th>
                 </tr>
-
             </thead>
-
-
             <tbody>
-
                 @foreach($transaction->details as $detail)
-
                     <tr>
-
                         <td>
-
                             <span class="item-name">
                                 {{ $detail->product_name ?? $detail->product->name ?? '-' }}
                             </span>
-
                             <span class="item-detail">
-                                {{ $detail->qty }}
-                                x
-                                Rp {{ number_format($detail->price, 0, ',', '.') }}
+                                {{ $detail->qty }} x {{ number_format($detail->price, 0, ',', '.') }}
                             </span>
-
                         </td>
-
-
                         <td class="text-right">
-
-                            Rp
                             {{ number_format($detail->subtotal, 0, ',', '.') }}
-
                         </td>
-
                     </tr>
-
                 @endforeach
-
             </tbody>
-
         </table>
 
-
         <div class="line"></div>
 
-
-        {{-- =========================================
-             RINGKASAN
-        ========================================== --}}
-
+        {{-- RINGKASAN --}}
         <div class="summary">
-
             <div class="summary-row">
-
-                <span>
-                    Subtotal
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->subtotal, 0, ',', '.') }}
-                </span>
-
+                <span>Subtotal</span>
+                <span>Rp {{ number_format($transaction->subtotal, 0, ',', '.') }}</span>
             </div>
 
-
+            @if(($transaction->discount ?? 0) > 0)
             <div class="summary-row">
-
-                <span>
-                    Diskon
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->discount, 0, ',', '.') }}
-                </span>
-
+                <span>Diskon</span>
+                <span>-Rp {{ number_format($transaction->discount, 0, ',', '.') }}</span>
             </div>
+            @endif
 
-
+            @if(($transaction->tax ?? 0) > 0)
             <div class="summary-row">
-
-                <span>
-                    Pajak
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->tax, 0, ',', '.') }}
-                </span>
-
+                <span>Pajak</span>
+                <span>Rp {{ number_format($transaction->tax, 0, ',', '.') }}</span>
             </div>
+            @endif
 
-
+            @if(($transaction->other_fee ?? 0) > 0)
             <div class="summary-row">
-
-                <span>
-                    Biaya Lain
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->other_fee, 0, ',', '.') }}
-                </span>
-
+                <span>Biaya Lain</span>
+                <span>Rp {{ number_format($transaction->other_fee, 0, ',', '.') }}</span>
             </div>
-
+            @endif
 
             <div class="summary-row total">
-
-                <span>
-                    TOTAL
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->grand_total, 0, ',', '.') }}
-                </span>
-
+                <span>TOTAL</span>
+                <span>Rp {{ number_format($transaction->grand_total, 0, ',', '.') }}</span>
             </div>
-
 
             <div class="summary-row">
-
-                <span>
-                    Bayar
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->paid_amount, 0, ',', '.') }}
-                </span>
-
+                <span>Bayar</span>
+                <span>Rp {{ number_format($transaction->paid_amount, 0, ',', '.') }}</span>
             </div>
-
 
             <div class="summary-row change">
-
-                <span>
-                    Kembalian
-                </span>
-
-                <span>
-                    Rp {{ number_format($transaction->change_amount, 0, ',', '.') }}
-                </span>
-
+                <span>Kembalian</span>
+                <span>Rp {{ number_format($transaction->change_amount, 0, ',', '.') }}</span>
             </div>
-
 
             <div class="summary-row">
-
-                <span>
-                    Metode
-                </span>
-
-                <span class="payment-method">
-                    {{ $transaction->payment_method }}
-                </span>
-
+                <span>Metode</span>
+                <span class="payment-method">{{ $transaction->payment_method }}</span>
             </div>
-
         </div>
-
 
         <div class="line"></div>
 
-
-        {{-- =========================================
-             FOOTER
-        ========================================== --}}
-
+        {{-- FOOTER --}}
         <div class="thank-you">
-
-            <strong>
-                Transaksi berhasil!
-            </strong>
-
-            <br>
-
-            Terima kasih telah berbelanja di TokoLokal.
-
-            <br>
-
+            <strong>Transaksi berhasil!</strong><br>
+            Terima kasih telah berbelanja.<br>
             Semoga hari Anda menyenangkan.
-
         </div>
 
     </div>
 
-
-    {{-- =========================================
-         BUTTON
-    ========================================== --}}
-
+    {{-- TOMBOL AKSfile --}}
     <div class="button-area">
-
-        <button
-            type="button"
-            class="button button-print"
-            onclick="window.print()"
-        >
+        <button type="button" class="button button-print" onclick="window.print()">
             🖨 Cetak Struk
         </button>
 
-
-        <a
-            href="{{ route('transactions.create') }}"
-            class="button button-back"
-        >
+        <a href="{{ route('transactions.create') }}" class="button button-back">
             ← Transaksi Baru
         </a>
-
     </div>
-
 </div>
 
-
 <script>
-
-    /*
-    |--------------------------------------------------------------------------
-    | OTOMATIS BUKA DIALOG PRINT
-    |--------------------------------------------------------------------------
-    */
-
     window.addEventListener('load', function () {
-
         setTimeout(function () {
-
             window.print();
-
         }, 500);
-
     });
-
 </script>
 
 </body>
-
 </html>

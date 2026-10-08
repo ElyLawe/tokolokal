@@ -24,8 +24,6 @@ class TransactionController extends Controller
             compact('transactions')
         );
     }
-
-
     /**
      * Menampilkan halaman transaksi kasir.
      */
@@ -41,8 +39,6 @@ class TransactionController extends Controller
             compact('products')
         );
     }
-
-
     /**
      * Menyimpan transaksi baru.
      */
@@ -53,85 +49,65 @@ class TransactionController extends Controller
         | VALIDASI DATA
         |--------------------------------------------------------------------------
         */
-
         $validated = $request->validate([
-
             'items' => [
                 'required',
                 'array',
                 'min:1',
             ],
-
             'items.*.product_id' => [
                 'required',
                 'integer',
                 'exists:products,id',
             ],
-
             'items.*.qty' => [
                 'required',
                 'integer',
                 'min:1',
             ],
-
             'customer_id' => [
                 'nullable',
                 'integer',
             ],
-
             'discount' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
-
             'tax' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
-
             'other_fee' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
-
             'paid_amount' => [
                 'required',
                 'numeric',
                 'min:0',
             ],
-
             'payment_method' => [
                 'required',
                 'in:tunai,qris,debit,kredit,e-wallet,transfer',
             ],
-
         ]);
-
-
         /*
         |--------------------------------------------------------------------------
         | DEFAULT VALUE
         |--------------------------------------------------------------------------
         */
-
         $discount = (float) ($validated['discount'] ?? 0);
-
         $tax = (float) ($validated['tax'] ?? 0);
-
         $otherFee = (float) ($validated['other_fee'] ?? 0);
-
         $paidAmount = (float) $validated['paid_amount'];
-
-
         /*
         |--------------------------------------------------------------------------
         | PROSES TRANSAKSI DATABASE
         |--------------------------------------------------------------------------
         */
-
         $transaction = DB::transaction(function () use (
             $validated,
             $discount,
@@ -139,25 +115,20 @@ class TransactionController extends Controller
             $otherFee,
             $paidAmount
         ) {
-
             /*
             |--------------------------------------------------------------------------
             | SIAPKAN PRODUK
             |--------------------------------------------------------------------------
             */
-
             $productIds = collect($validated['items'])
                 ->pluck('product_id')
                 ->unique()
                 ->values();
-
-
             /*
             |--------------------------------------------------------------------------
             | AMBIL PRODUK DAN LOCK ROW
             |--------------------------------------------------------------------------
             */
-
             $products = Product::whereIn(
                 'id',
                 $productIds
@@ -166,20 +137,14 @@ class TransactionController extends Controller
             ->lockForUpdate()
             ->get()
             ->keyBy('id');
-
-
             /*
             |--------------------------------------------------------------------------
             | CEK PRODUK
             |--------------------------------------------------------------------------
             */
-
             foreach ($validated['items'] as $item) {
-
                 $productId = $item['product_id'];
-
                 $qty = (int) $item['qty'];
-
                 if (!isset($products[$productId])) {
 
                     abort(
@@ -187,17 +152,12 @@ class TransactionController extends Controller
                         'Produk tidak ditemukan atau sudah tidak aktif.'
                     );
                 }
-
-
                 $product = $products[$productId];
-
-
                 /*
                 |--------------------------------------------------------------------------
                 | CEK STOCK
                 |--------------------------------------------------------------------------
                 */
-
                 if ($product->stock < $qty) {
 
                     abort(
@@ -208,17 +168,12 @@ class TransactionController extends Controller
                     );
                 }
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | HITUNG SUBTOTAL
             |--------------------------------------------------------------------------
             */
-
             $subtotal = 0;
-
-
             foreach ($validated['items'] as $item) {
 
                 $productId = $item['product_id'];
@@ -234,33 +189,25 @@ class TransactionController extends Controller
 
                 $subtotal += $itemSubtotal;
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | HITUNG GRAND TOTAL
             |--------------------------------------------------------------------------
             */
-
             $grandTotal =
                 $subtotal
                 - $discount
                 + $tax
                 + $otherFee;
-
-
             /*
             |--------------------------------------------------------------------------
             | CEK TOTAL
             |--------------------------------------------------------------------------
             */
-
             if ($grandTotal < 0) {
 
                 $grandTotal = 0;
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | CEK UANG BAYAR
@@ -274,24 +221,18 @@ class TransactionController extends Controller
                     'Uang pembayaran tidak mencukupi.'
                 );
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | HITUNG KEMBALIAN
             |--------------------------------------------------------------------------
             */
-
             $changeAmount =
                 $paidAmount - $grandTotal;
-
-
             /*
             |--------------------------------------------------------------------------
             | NOMOR TRANSAKSI
             |--------------------------------------------------------------------------
             */
-
             $transactionNumber =
                 'TRX-' .
                 now()->format('YmdHis') .
@@ -299,16 +240,12 @@ class TransactionController extends Controller
                 strtoupper(
                     Str::random(4)
                 );
-
-
             /*
             |--------------------------------------------------------------------------
             | SIMPAN TRANSAKSI
             |--------------------------------------------------------------------------
             */
-
             $transaction = Transaction::create([
-
                 'transaction_number' =>
                     $transactionNumber,
 
@@ -345,35 +282,23 @@ class TransactionController extends Controller
                 'status' =>
                     'completed',
             ]);
-
-
             /*
             |--------------------------------------------------------------------------
             | SIMPAN DETAIL TRANSAKSI
             |--------------------------------------------------------------------------
             */
-
             foreach ($validated['items'] as $item) {
-
                 $productId = $item['product_id'];
-
                 $qty = (int) $item['qty'];
-
                 $product = $products[$productId];
-
-
                 $itemSubtotal =
                     (float) $product->price * $qty;
-
-
                 /*
                 |--------------------------------------------------------------------------
                 | SIMPAN DETAIL
                 |--------------------------------------------------------------------------
                 */
-
                 $transaction->details()->create([
-
                     'product_id' =>
                         $product->id,
 
@@ -395,31 +320,23 @@ class TransactionController extends Controller
                     'subtotal' =>
                         $itemSubtotal,
                 ]);
-
-
                 /*
                 |--------------------------------------------------------------------------
                 | KURANGI STOCK
                 |--------------------------------------------------------------------------
                 */
-
                 $product->decrement(
                     'stock',
                     $qty
                 );
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | RETURN TRANSACTION
             |--------------------------------------------------------------------------
             */
-
             return $transaction;
         });
-
-
         /*
         |--------------------------------------------------------------------------
         | REDIRECT KE STRUK
@@ -436,8 +353,6 @@ class TransactionController extends Controller
                 'Transaksi berhasil disimpan.'
             );
     }
-
-
     /**
      * Menampilkan detail transaksi.
      */
@@ -458,8 +373,6 @@ class TransactionController extends Controller
             'user',
             'details.product',
         ]);
-
-
         /*
         |--------------------------------------------------------------------------
         | TAMPILKAN HALAMAN DETAIL
@@ -471,8 +384,6 @@ class TransactionController extends Controller
             compact('transaction')
         );
     }
-
-
     /**
      * Menampilkan struk transaksi.
      */
@@ -488,14 +399,11 @@ class TransactionController extends Controller
             'user',
             'details.product',
         ]);
-
-
         /*
         |--------------------------------------------------------------------------
         | TAMPILKAN STRUK
         |--------------------------------------------------------------------------
         */
-
         return view(
             'kasir.receipt',
             compact('transaction')
