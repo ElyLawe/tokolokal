@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
@@ -24,6 +25,7 @@ class TransactionController extends Controller
             compact('transactions')
         );
     }
+
     /**
      * Menampilkan halaman transaksi kasir.
      */
@@ -39,6 +41,7 @@ class TransactionController extends Controller
             compact('products')
         );
     }
+
     /**
      * Menyimpan transaksi baru.
      */
@@ -94,6 +97,7 @@ class TransactionController extends Controller
                 'in:tunai,qris,debit,kredit,e-wallet,transfer',
             ],
         ]);
+
         /*
         |--------------------------------------------------------------------------
         | DEFAULT VALUE
@@ -103,6 +107,7 @@ class TransactionController extends Controller
         $tax = (float) ($validated['tax'] ?? 0);
         $otherFee = (float) ($validated['other_fee'] ?? 0);
         $paidAmount = (float) $validated['paid_amount'];
+
         /*
         |--------------------------------------------------------------------------
         | PROSES TRANSAKSI DATABASE
@@ -124,6 +129,7 @@ class TransactionController extends Controller
                 ->pluck('product_id')
                 ->unique()
                 ->values();
+
             /*
             |--------------------------------------------------------------------------
             | AMBIL PRODUK DAN LOCK ROW
@@ -137,29 +143,17 @@ class TransactionController extends Controller
             ->lockForUpdate()
             ->get()
             ->keyBy('id');
-            /*
-            |--------------------------------------------------------------------------
-            | CEK PRODUK
-            |--------------------------------------------------------------------------
-            */
             foreach ($validated['items'] as $item) {
                 $productId = $item['product_id'];
                 $qty = (int) $item['qty'];
                 if (!isset($products[$productId])) {
-
                     abort(
                         422,
                         'Produk tidak ditemukan atau sudah tidak aktif.'
                     );
                 }
                 $product = $products[$productId];
-                /*
-                |--------------------------------------------------------------------------
-                | CEK STOCK
-                |--------------------------------------------------------------------------
-                */
                 if ($product->stock < $qty) {
-
                     abort(
                         422,
                         'Stock produk "' .
@@ -168,71 +162,30 @@ class TransactionController extends Controller
                     );
                 }
             }
-            /*
-            |--------------------------------------------------------------------------
-            | HITUNG SUBTOTAL
-            |--------------------------------------------------------------------------
-            */
             $subtotal = 0;
             foreach ($validated['items'] as $item) {
-
                 $productId = $item['product_id'];
-
                 $qty = (int) $item['qty'];
-
                 $product = $products[$productId];
 
-
-                $itemSubtotal =
-                    (float) $product->price * $qty;
-
-
+                $itemSubtotal = (float) $product->price * $qty;
                 $subtotal += $itemSubtotal;
             }
-            /*
-            |--------------------------------------------------------------------------
-            | HITUNG GRAND TOTAL
-            |--------------------------------------------------------------------------
-            */
             $grandTotal =
                 $subtotal
                 - $discount
                 + $tax
                 + $otherFee;
-            /*
-            |--------------------------------------------------------------------------
-            | CEK TOTAL
-            |--------------------------------------------------------------------------
-            */
             if ($grandTotal < 0) {
-
                 $grandTotal = 0;
             }
-            /*
-            |--------------------------------------------------------------------------
-            | CEK UANG BAYAR
-            |--------------------------------------------------------------------------
-            */
-
             if ($paidAmount < $grandTotal) {
-
                 abort(
                     422,
                     'Uang pembayaran tidak mencukupi.'
                 );
             }
-            /*
-            |--------------------------------------------------------------------------
-            | HITUNG KEMBALIAN
-            |--------------------------------------------------------------------------
-            */
-            $changeAmount =
-                $paidAmount - $grandTotal;
-            /*
-            |--------------------------------------------------------------------------
-            | NOMOR TRANSAKSI
-            |--------------------------------------------------------------------------
-            */
+            $changeAmount = $paidAmount - $grandTotal;
             $transactionNumber =
                 'TRX-' .
                 now()->format('YmdHis') .
@@ -240,109 +193,42 @@ class TransactionController extends Controller
                 strtoupper(
                     Str::random(4)
                 );
-            /*
-            |--------------------------------------------------------------------------
-            | SIMPAN TRANSAKSI
-            |--------------------------------------------------------------------------
-            */
             $transaction = Transaction::create([
-                'transaction_number' =>
-                    $transactionNumber,
-
-                'user_id' =>
-                    auth()->id(),
-
-                'customer_id' =>
-                    $validated['customer_id'] ?? null,
-
-                'subtotal' =>
-                    $subtotal,
-
-                'discount' =>
-                    $discount,
-
-                'tax' =>
-                    $tax,
-
-                'other_fee' =>
-                    $otherFee,
-
-                'grand_total' =>
-                    $grandTotal,
-
-                'paid_amount' =>
-                    $paidAmount,
-
-                'change_amount' =>
-                    $changeAmount,
-
-                'payment_method' =>
-                    $validated['payment_method'],
-
-                'status' =>
-                    'completed',
+                'transaction_number' => $transactionNumber,
+                'user_id' => auth()->id(),
+                'customer_id' => $validated['customer_id'] ?? null,
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'tax' => $tax,
+                'other_fee' => $otherFee,
+                'grand_total' => $grandTotal,
+                'paid_amount' => $paidAmount,
+                'change_amount' => $changeAmount,
+                'payment_method' => $validated['payment_method'],
+                'status' => 'completed',
             ]);
-            /*
-            |--------------------------------------------------------------------------
-            | SIMPAN DETAIL TRANSAKSI
-            |--------------------------------------------------------------------------
-            */
             foreach ($validated['items'] as $item) {
                 $productId = $item['product_id'];
                 $qty = (int) $item['qty'];
                 $product = $products[$productId];
-                $itemSubtotal =
-                    (float) $product->price * $qty;
-                /*
-                |--------------------------------------------------------------------------
-                | SIMPAN DETAIL
-                |--------------------------------------------------------------------------
-                */
+                $itemSubtotal = (float) $product->price * $qty;
+
                 $transaction->details()->create([
-                    'product_id' =>
-                        $product->id,
-
-                    'product_code' =>
-                        null,
-
-                    'product_name' =>
-                        $product->name,
-
-                    'price' =>
-                        $product->price,
-
-                    'qty' =>
-                        $qty,
-
-                    'discount' =>
-                        0,
-
-                    'subtotal' =>
-                        $itemSubtotal,
+                    'product_id' => $product->id,
+                    'product_code' => null,
+                    'product_name' => $product->name,
+                    'price' => $product->price,
+                    'qty' => $qty,
+                    'discount' => 0,
+                    'subtotal' => $itemSubtotal,
                 ]);
-                /*
-                |--------------------------------------------------------------------------
-                | KURANGI STOCK
-                |--------------------------------------------------------------------------
-                */
                 $product->decrement(
                     'stock',
                     $qty
                 );
             }
-            /*
-            |--------------------------------------------------------------------------
-            | RETURN TRANSACTION
-            |--------------------------------------------------------------------------
-            */
             return $transaction;
         });
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT KE STRUK
-        |--------------------------------------------------------------------------
-        */
-
         return redirect()
             ->route(
                 'transactions.receipt',
@@ -353,60 +239,46 @@ class TransactionController extends Controller
                 'Transaksi berhasil disimpan.'
             );
     }
-    /**
-     * Menampilkan detail transaksi.
-     */
     public function show(Transaction $transaction)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD RELATIONSHIP
-        |--------------------------------------------------------------------------
-        |
-        | user           = kasir yang melakukan transaksi
-        | details        = daftar produk dalam transaksi
-        | details.product = data product asli
-        |
-        */
-
         $transaction->load([
             'user',
             'details.product',
         ]);
-        /*
-        |--------------------------------------------------------------------------
-        | TAMPILKAN HALAMAN DETAIL
-        |--------------------------------------------------------------------------
-        */
 
         return view(
             'transactions.show',
             compact('transaction')
         );
     }
-    /**
-     * Menampilkan struk transaksi.
-     */
     public function receipt(Transaction $transaction)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD RELATIONSHIP
-        |--------------------------------------------------------------------------
-        */
-
         $transaction->load([
             'user',
             'details.product',
         ]);
-        /*
-        |--------------------------------------------------------------------------
-        | TAMPILKAN STRUK
-        |--------------------------------------------------------------------------
-        */
+
         return view(
             'kasir.receipt',
             compact('transaction')
         );
+    }
+    public function invoice(Transaction $transaction)
+    {
+        $transaction->load(['user', 'details.product']);
+        $invoice = $transaction;
+        $invoice->items = $transaction->details->map(function ($detail) {
+            $detail->quantity = $detail->qty;
+            $detail->total = $detail->subtotal;
+            if (!$detail->relationLoaded('product') || !$detail->product) {
+                $detail->product = (object) ['name' => $detail->product_name];
+            }
+            return $detail;
+        });
+        $invoice->total = $transaction->grand_total;
+
+        $pdf = Pdf::loadView('invoices.invoice', compact('invoice'));
+
+        return $pdf->download('invoice_' . $transaction->transaction_number . '.pdf');
     }
 }

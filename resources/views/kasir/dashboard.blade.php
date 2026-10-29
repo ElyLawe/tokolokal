@@ -15,7 +15,7 @@
     }
 
     /* =========================
-       HEADER
+        HEADER
     ========================= */
 
     .dashboard-header {
@@ -52,7 +52,7 @@
 
 
     /* =========================
-       STATISTICS
+        STATISTICS
     ========================= */
 
     .stats-grid {
@@ -92,7 +92,7 @@
         border-radius: 11px;
         background: #eff6ff;
         color: #2563eb;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 800;
         margin-bottom: 17px;
     }
@@ -119,7 +119,7 @@
 
 
     /* =========================
-       QUICK ACTION
+        QUICK ACTION
     ========================= */
 
     .section-title {
@@ -197,7 +197,7 @@
 
 
     /* =========================
-       TWO COLUMN CONTENT
+        TWO COLUMN CONTENT
     ========================= */
 
     .dashboard-grid {
@@ -234,7 +234,7 @@
 
 
     /* =========================
-       TRANSACTION LIST
+        TRANSACTION LIST
     ========================= */
 
     .transaction-list {
@@ -263,6 +263,11 @@
         color: #1d4ed8;
         font-size: 13px;
         font-weight: 700;
+        text-decoration: none;
+    }
+
+    .transaction-number:hover {
+        text-decoration: underline;
     }
 
     .transaction-cashier {
@@ -274,6 +279,10 @@
     .transaction-right {
         text-align: right;
         flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
     }
 
     .transaction-total {
@@ -283,10 +292,34 @@
         font-weight: 700;
     }
 
+    .transaction-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin-top: 2px;
+    }
+
+    .btn-action-sm {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-detail {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .btn-pdf {
+        background: #dcfce7;
+        color: #166534;
+    }
+
     .transaction-status {
         display: inline-flex;
-        margin-top: 5px;
-        padding: 4px 8px;
+        padding: 3px 7px;
         border-radius: 999px;
         background: #ecfdf5;
         color: #047857;
@@ -318,7 +351,7 @@
 
 
     /* =========================
-       LOW STOCK
+        LOW STOCK
     ========================= */
 
     .stock-list {
@@ -373,11 +406,10 @@
 
 
     /* =========================
-       RESPONSIVE
+        RESPONSIVE
     ========================= */
 
     @media (max-width: 900px) {
-
         .stats-grid {
             grid-template-columns: 1fr;
         }
@@ -385,12 +417,10 @@
         .dashboard-grid {
             grid-template-columns: 1fr;
         }
-
     }
 
 
     @media (max-width: 650px) {
-
         .kasir-dashboard {
             padding: 25px 15px 40px;
         }
@@ -415,7 +445,6 @@
         .transaction-item {
             align-items: flex-start;
         }
-
     }
 </style>
 
@@ -626,9 +655,9 @@
 
                             <div class="transaction-left">
 
-                                <p class="transaction-number">
+                                <a href="{{ route('transactions.show', $transaction->id) }}" class="transaction-number">
                                     {{ $transaction->transaction_number }}
-                                </p>
+                                </a>
 
                                 <p class="transaction-cashier">
                                     Kasir:
@@ -644,9 +673,14 @@
                                     Rp {{ number_format((float) $transaction->grand_total, 0, ',', '.') }}
                                 </p>
 
-                                <span class="transaction-status">
-                                    {{ ucfirst($transaction->status) }}
-                                </span>
+                                <div class="transaction-actions">
+                                    <span class="transaction-status">
+                                        {{ ucfirst($transaction->status) }}
+                                    </span>
+                                    <a href="{{ route('transactions.invoice', $transaction->id) }}" class="btn-action-sm btn-pdf" title="Download PDF">
+                                        PDF
+                                    </a>
+                                </div>
 
                             </div>
 

@@ -112,10 +112,11 @@
             </div>
 
 
-            {{-- FORM --}}
+            {{-- FORM (Ditambahkan enctype="multipart/form-data" untuk upload file gambar) --}}
             <form
                 action="{{ route('products.store') }}"
                 method="POST"
+                enctype="multipart/form-data"
             >
 
                 @csrf
@@ -384,7 +385,7 @@
                     </div>
 
 
-                    {{-- IMAGE --}}
+                    {{-- IMAGE (Diubah menjadi input file agar mendukung upload gambar Acara 29) --}}
                     <div style="
                         margin-bottom: 22px;
                     ">
@@ -403,16 +404,14 @@
                         </label>
 
                         <input
-                            type="text"
+                            type="file"
                             id="image"
                             name="image"
-                            value="{{ old('image') }}"
-                            placeholder="Contoh: nasi-goreng.jpg"
+                            accept="image/jpeg,image/png,image/jpg,image/webp"
                             style="
                                 display: block;
                                 width: 100%;
-                                height: 46px;
-                                padding: 0 14px;
+                                padding: 10px 14px;
                                 box-sizing: border-box;
                                 background: #ffffff;
                                 border: 1px solid #d1d5db;
@@ -428,8 +427,20 @@
                             color: #9ca3af;
                             font-size: 12px;
                         ">
-                            Masukkan nama file gambar jika tersedia.
+                            Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB).
                         </p>
+
+                        @error('image')
+
+                            <div style="
+                                margin-top: 6px;
+                                color: #dc2626;
+                                font-size: 13px;
+                            ">
+                                {{ $message }}
+                            </div>
+
+                        @enderror
 
                     </div>
 

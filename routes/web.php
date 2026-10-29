@@ -9,12 +9,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
 Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
             ->name('admin.dashboard');
-
         Route::resource('products', ProductController::class);
     });
 
@@ -39,6 +37,10 @@ Route::middleware(['auth'])->group(function () {
         // Cetak Struk
         Route::get('/transactions/{transaction}/receipt', [TransactionController::class, 'receipt'])
             ->name('transactions.receipt');
+
+        // Cetak / Download Invoice PDF (Acara 30)
+        Route::get('/transactions/{transaction}/invoice', [TransactionController::class, 'invoice'])
+            ->name('transactions.invoice');
     });
 
     Route::middleware(['role:kasir'])->group(function () {

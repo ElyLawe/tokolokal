@@ -110,8 +110,12 @@
                         border-bottom: 1px solid #e5e7eb;
                     ">
 
-                        <th style="padding: 15px; text-align: left; font-size: 13px; color: #6b7280;">
+                        <th style="padding: 15px; text-align: left; font-size: 13px; color: #6b7280; width: 60px;">
                             No
+                        </th>
+
+                        <th style="padding: 15px; text-align: left; font-size: 13px; color: #6b7280; width: 70px;">
+                            Foto
                         </th>
 
                         <th style="padding: 15px; text-align: left; font-size: 13px; color: #6b7280;">
@@ -158,6 +162,18 @@
                                 font-size: 14px;
                             ">
                                 {{ $products->firstItem() + $loop->index }}
+                            </td>
+
+
+                            {{-- FOTO THUMBNAIL --}}
+                            <td style="
+                                padding: 16px;
+                            ">
+                                @if($product->image)
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                @else
+                                    <div style="width: 45px; height: 45px; background: #e5e7eb; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #6b7280;">No Img</div>
+                                @endif
                             </td>
 
 
@@ -372,7 +388,7 @@
                         <tr>
 
                             <td
-                                colspan="7"
+                                colspan="8"
                                 style="
                                     padding: 50px 20px;
                                     text-align: center;

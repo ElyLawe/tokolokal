@@ -71,7 +71,7 @@
         @endif
 
 
-        {{-- FORM --}}
+        {{-- FORM (Ditambahkan enctype="multipart/form-data") --}}
         <div style="
             background:white;
             border-radius:12px;
@@ -82,6 +82,7 @@
             <form
                 action="{{ route('products.update', $product) }}"
                 method="POST"
+                enctype="multipart/form-data"
             >
 
                 @csrf
@@ -142,6 +143,7 @@
                             border:1px solid #d1d5db;
                             border-radius:7px;
                             font-size:14px;
+                            outline:none;
                         "
                     >
 
@@ -249,7 +251,7 @@
                 </div>
 
 
-                {{-- FOTO --}}
+                {{-- FOTO (Diubah menjadi input file untuk Intervention Image) --}}
                 <div style="margin-bottom:20px;">
 
                     <label style="
@@ -258,21 +260,21 @@
                         font-weight:600;
                         color:#374151;
                     ">
-                        Foto Product
+                        Ganti Foto Product (Opsional)
                     </label>
 
                     <input
-                        type="text"
+                        type="file"
                         name="image"
-                        value="{{ old('image', $product->image) }}"
-                        placeholder="Contoh: sepatu.jpg"
+                        accept="image/jpeg,image/png,image/jpg,image/webp"
                         style="
                             width:100%;
                             box-sizing:border-box;
-                            padding:11px 13px;
+                            padding:10px 13px;
                             border:1px solid #d1d5db;
                             border-radius:7px;
                             font-size:14px;
+                            background:#fff;
                         "
                     >
 
@@ -281,14 +283,13 @@
                         color:#6b7280;
                         font-size:13px;
                     ">
-                        Masukkan nama file foto yang berada di
-                        <strong>public/images/products</strong>.
+                        Biarkan kosong jika tidak ingin mengubah foto product. Format: JPG, JPEG, PNG, WEBP (Maks. 2MB).
                     </p>
 
                 </div>
 
 
-                {{-- PREVIEW FOTO --}}
+                {{-- PREVIEW FOTO SAAT INI --}}
                 @if($product->image)
 
                     <div style="
@@ -309,7 +310,7 @@
                         </div>
 
                         <img
-                            src="{{ asset('images/products/' . $product->image) }}"
+                            src="{{ asset('storage/' . $product->image) }}"
                             alt="{{ $product->name }}"
                             style="
                                 width:150px;

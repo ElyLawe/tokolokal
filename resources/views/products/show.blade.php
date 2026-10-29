@@ -255,7 +255,7 @@
                 </div>
 
 
-                {{-- IMAGE --}}
+                {{-- IMAGE PREVIEW --}}
 
                 <div style="
                     margin-bottom: 25px;
@@ -267,17 +267,30 @@
                         font-size: 15px;
                         font-weight: 700;
                     ">
-                        Image
+                        Image Product
                     </h3>
 
                     <div style="
                         padding: 16px;
                         background: #f9fafb;
                         border-radius: 9px;
-                        color: #6b7280;
-                        font-size: 14px;
                     ">
-                        {{ $product->image ?: 'Tidak ada image.' }}
+                        @if($product->image)
+                            <img 
+                                src="{{ asset('storage/' . $product->image) }}" 
+                                alt="{{ $product->name }}" 
+                                style="
+                                    max-width: 250px; 
+                                    max-height: 250px; 
+                                    object-fit: cover; 
+                                    border-radius: 8px; 
+                                    border: 1px solid #d1d5db;
+                                    display: block;
+                                "
+                            >
+                        @else
+                            <span style="color: #6b7280; font-size: 14px;">Tidak ada image.</span>
+                        @endif
                     </div>
 
                 </div>

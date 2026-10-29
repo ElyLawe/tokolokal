@@ -150,23 +150,39 @@
 
         .button-area {
             display: flex;
-            justify-content: center;
-            gap: 8px;
+            flex-direction: column;
+            gap: 6px;
             margin-top: 15px;
+            max-width: 58mm;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
         }
 
         .button {
             border: none;
             border-radius: 4px;
-            padding: 8px 12px;
-            font-size: 12px;
+            padding: 8px 10px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
+            text-align: center;
+            flex: 1;
         }
 
         .button-print {
             background: #2563eb;
+            color: white;
+        }
+
+        .button-pdf {
+            background: #16a34a;
             color: white;
         }
 
@@ -340,12 +356,16 @@
 
     </div>
 
-    {{-- TOMBOL AKSfile --}}
+    {{-- TOMBOL AKSI --}}
     <div class="button-area">
-        <button type="button" class="button button-print" onclick="window.print()">
-            🖨 Cetak Struk
-        </button>
-
+        <div class="button-group">
+            <button type="button" class="button button-print" onclick="window.print()">
+                🖨 Cetak Struk
+            </button>
+            <a href="{{ route('transactions.invoice', $transaction->id) }}" class="button button-pdf">
+                📥 Download PDF
+            </a>
+        </div>
         <a href="{{ route('transactions.create') }}" class="button button-back">
             ← Transaksi Baru
         </a>
